@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   FileText,
   Calendar,
-  Settings,
   Search,
   Bookmark,
   ShieldCheck,
@@ -22,8 +21,9 @@ import {
   GraduationCap,
   MessageSquareText,
   Building2,
-  UserPlus,
+  Crown,
 } from "lucide-react";
+import { organizationService, type EmployerAccount } from "@/lib/api/services/organization";
 import { NotificationCenter } from "./NotificationCenter";
 import { SignOutButton } from "./SignOutButton";
 
@@ -35,6 +35,20 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [employer, setEmployer] = useState<EmployerAccount | null>(null);
+
+  useEffect(() => {
+    if (role !== "employer") return;
+
+    let isMounted = true;
+    organizationService.getCurrentEmployer().then((currentEmployer) => {
+      if (isMounted) setEmployer(currentEmployer);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [role]);
 
   const navItems = {
     candidate: [
@@ -42,7 +56,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       { name: "My Profile", href: "/candidate/profile", icon: User },
       { name: "Interviews", href: "/candidate/interviews", icon: Calendar },
       { name: "My Placements", href: "/candidate/placements", icon: Briefcase },
-      { name: "Career Development", href: "/candidate/career", icon: GraduationCap },
+      {
+        name: "Career Development",
+        href: "/candidate/career",
+        icon: GraduationCap,
+      },
     ],
     employer: [
       { name: "Overview", href: "/employer", icon: LayoutDashboard },
@@ -55,14 +73,30 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
     ],
     admin: [
       { name: "Overview", href: "/admin", icon: LayoutDashboard },
-      { name: "Candidate Invitations", href: "/admin/invitations", icon: UserPlus },
       { name: "Workflow Reviews", href: "/admin/reviews", icon: ShieldCheck },
-      { name: "Verifications", href: "/admin/verifications", icon: ShieldCheck },
-      { name: "Decline Monitoring", href: "/admin/decline-monitoring", icon: AlertTriangle },
-      { name: "Confidential Feedback", href: "/admin/feedback", icon: MessageSquareText },
+      {
+        name: "Verifications",
+        href: "/admin/verifications",
+        icon: ShieldCheck,
+      },
+      {
+        name: "Profile Approvals",
+        href: "/admin/profile-approvals",
+        icon: FileText,
+      }, // NEW
+      { name: "Training", href: "/admin/training", icon: GraduationCap },
+      {
+        name: "Decline Monitoring",
+        href: "/admin/decline-monitoring",
+        icon: AlertTriangle,
+      },
+      {
+        name: "Confidential Feedback",
+        href: "/admin/feedback",
+        icon: MessageSquareText,
+      },
       { name: "Finance & Payments", href: "/admin/finance", icon: CreditCard },
       { name: "Placement Funnel", href: "/admin/placements", icon: TrendingUp },
-      { name: "Training Impact", href: "/admin/training", icon: GraduationCap },
       { name: "Audit Logs", href: "/admin/audit", icon: History },
     ],
   };
@@ -78,10 +112,18 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
     employer: "HR",
     admin: "RA",
   }[role];
+  const isNavItemActive = (href: string) =>
+    pathname === href || (href !== `/${role}` && pathname.startsWith(`${href}/`));
+  const subscriptionDaysLeft = employer
+    ? organizationService.getSubscriptionDaysLeft(employer)
+    : null;
 
   return (
     <div className="relative min-h-screen flex bg-[var(--color-background)]">
-      <div className="brand-ribbon fixed inset-x-0 top-0 z-30 h-1" aria-hidden="true" />
+      <div
+        className="brand-ribbon fixed inset-x-0 top-0 z-30 h-1"
+        aria-hidden="true"
+      />
       {/* Desktop Sidebar */}
       <aside className="fixed z-20 hidden h-full w-64 flex-col border-r border-slate-200 bg-white md:flex">
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
@@ -100,12 +142,12 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             {roleTitle} portal
           </div>
           {currentNav.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = isNavItemActive(item.href);
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
@@ -133,7 +175,9 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={isMobileMenuOpen ? "Close navigation" : "Open navigation"}
+              aria-label={
+                isMobileMenuOpen ? "Close navigation" : "Open navigation"
+              }
               aria-expanded={isMobileMenuOpen}
               className="rounded-md p-2 text-slate-600 hover:bg-primary-50 hover:text-primary-800"
             >
@@ -146,9 +190,49 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
+            {role === "employer" && employer && (
+              <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 sm:flex">
+                  <div className="flex h-7 w-7 items-center justify-center rounded bg-primary-100 text-primary-700">
+                    <Building2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="max-w-[120px] truncate text-xs font-semibold text-slate-900">
+                      {employer.organizationName || "Your Org"}
+                    </p>
+                    <p className="flex items-center gap-1 text-[10px] text-slate-500">
+                      <Crown
+                        className={`h-2.5 w-2.5 ${
+                          employer.subscriptionTier === "Gold"
+                            ? "text-amber-500"
+                            : employer.subscriptionTier === "Silver"
+                              ? "text-slate-400"
+                              : "text-primary-500"
+                        }`}
+                      />
+                      {employer.subscriptionTier || "No"} Package
+                    </p>
+                  </div>
+                </div>
+                {employer.subscriptionEndDate && subscriptionDaysLeft !== null && (
+                  <div
+                    className={`hidden rounded-lg px-2.5 py-1.5 text-xs font-medium md:block ${
+                      subscriptionDaysLeft > 30
+                        ? "bg-emerald-50 text-emerald-700"
+                        : subscriptionDaysLeft > 7
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {subscriptionDaysLeft} days left
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Replaced static bell with the functional NotificationCenter */}
             <NotificationCenter role={role} />
-            
+
             <div
               aria-label={`${roleTitle} account`}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-primary-200 bg-primary-100 text-xs font-bold text-primary-800"
@@ -160,15 +244,18 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <nav aria-label={`${roleTitle} navigation`} className="border-b border-slate-200 bg-white p-4 md:hidden">
+          <nav
+            aria-label={`${roleTitle} navigation`}
+            className="border-b border-slate-200 bg-white p-4 md:hidden"
+          >
             {currentNav.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                aria-current={pathname === item.href ? "page" : undefined}
+                aria-current={isNavItemActive(item.href) ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
-                  pathname === item.href
+                  isNavItemActive(item.href)
                     ? "bg-primary-50 text-primary-800"
                     : "text-slate-600 hover:bg-primary-50"
                 }`}
