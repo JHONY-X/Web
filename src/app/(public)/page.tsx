@@ -1,13 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BriefcaseBusiness,
-  CheckCircle2,
-  ClipboardCheck,
   HeartPulse,
   MapPin,
   ShieldCheck,
-  UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -33,78 +31,76 @@ const pathways = [
 export default function LandingPage() {
   return (
     <div>
-      <section className="relative overflow-hidden bg-[#f7faf6]">
-        <div className="pointer-events-none absolute -right-36 -top-32 h-[28rem] w-[28rem] rounded-full bg-accent-100/60 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-48 -left-40 h-[28rem] w-[28rem] rounded-full bg-primary-100/80 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-8 lg:py-24">
-          <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white px-3.5 py-2 text-xs font-semibold tracking-wide text-primary-800 shadow-sm">
+      <section className="relative isolate flex min-h-[620px] items-center overflow-hidden bg-primary-900 sm:min-h-[680px]">
+        <Image
+          src="/hero-image.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="z-0 object-cover object-center"
+        />
+        <div className="hero-overlay absolute inset-0 z-10 bg-gradient-to-r from-white/95 via-white/85 to-white/25" />
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+          <div className="max-w-2xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white/90 px-3.5 py-2 text-xs font-semibold tracking-wide text-primary-800 shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-accent-600" />
-              HEALTHCARE CAREERS &amp; ORGANIZATION SUPPORT
+              SERVING COMMUNITIES SINCE 2017
             </div>
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem]">
-              Better connections for <span className="text-primary-700">healthcare</span> and care.
+            <h1 className="text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+              Compassionate healthcare, <span className="text-primary-700">right at home.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-              Rohobot brings healthcare professionals and organizations together through profile review, recruitment tools, and career support.
+            <p className="mt-6 max-w-xl text-base leading-7 text-slate-700 sm:text-lg sm:leading-8">
+              Rohobot Home-Based Health Care Service provides high-quality, comprehensive, and affordable care for chronically ill patients and older adults—delivered by skilled, compassionate, and reliable healthcare professionals.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/employer/register"><Button size="lg" className="w-full gap-2 sm:w-auto">Find healthcare talent <ArrowRight className="h-4 w-4" /></Button></Link>
-              <Link href="/login?role=candidate"><Button size="lg" variant="outline" className="w-full bg-white sm:w-auto">Candidate sign in</Button></Link>
+              <Link href="/login?role=candidate"><Button size="lg" variant="outline" className="w-full border-white bg-white/90 sm:w-auto">Healthcare professional sign in</Button></Link>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-600">
-              <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary-700" /> Profile review workflow</span>
-              <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-primary-700" /> Built for Ethiopia</span>
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-xl">
-            <div className="absolute -right-4 -top-5 h-24 w-24 rounded-3xl bg-accent-100 sm:-right-6 sm:-top-6" />
-            <div className="absolute -bottom-5 -left-5 h-28 w-28 rounded-full bg-primary-100" />
-            <div className="relative rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_70px_-35px_rgba(25,55,40,0.35)] sm:p-7">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary-700">One connected platform</p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">Designed around care teams</h2>
-                </div>
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent-50 text-accent-700"><HeartPulse className="h-6 w-6" /></span>
-              </div>
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-[#fbfcfa] p-4">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-800"><UsersRound className="h-5 w-5" /></span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-900">Professional profiles</p>
-                    <p className="mt-1 text-sm text-slate-500">Experience, qualifications, and career details</p>
-                  </div>
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-primary-600" />
-                </div>
-                <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-[#fbfcfa] p-4">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-800"><BriefcaseBusiness className="h-5 w-5" /></span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-900">Organization tools</p>
-                    <p className="mt-1 text-sm text-slate-500">Recruitment workflows for healthcare employers</p>
-                  </div>
-                  <ArrowRight className="h-5 w-5 shrink-0 text-accent-600" />
-                </div>
-                <div className="flex items-center gap-4 rounded-2xl bg-primary-900 p-4 text-white">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10"><ClipboardCheck className="h-5 w-5" /></span>
-                  <div>
-                    <p className="font-semibold">People-first process</p>
-                    <p className="mt-1 text-sm text-primary-100">Support for both sides of healthcare hiring</p>
-                  </div>
-                </div>
-              </div>
-              <p className="mt-4 text-center text-xs text-slate-400">A preview of Rohobot&apos;s professional workflow</p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-medium text-slate-700">
+              <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary-700" /> Quality, trusted care</span>
+              <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-primary-700" /> Proudly serving Ethiopia</span>
             </div>
           </div>
         </div>
       </section>
+      <section id="about" className="scroll-mt-28 bg-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <article>
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-accent-700">Our story</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              Care at home, built on understanding.
+            </h2>
+            <div className="mt-6 space-y-4 text-base leading-7 text-slate-600">
+              <p>
+                Rohobot Home-Based Health Care Service was established in 2017 to provide high-quality, comprehensive, and affordable home-based healthcare services for chronically ill patients and the elderly. Our services are delivered by skilled, compassionate, and reliable healthcare professionals.
+              </p>
+              <p>
+                Founded by two sisters who faced the same challenge—limited access to legally registered home-based healthcare providers—Rohobot was created to bridge this gap and ensure quality care for those in need.
+              </p>
+            </div>
+          </article>
 
-      <section role="note" className="border-y border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm leading-6 text-amber-900">
-        Local demo preview. Email, identity verification, payments, and records are not connected to production services. Please do not submit real sensitive information.
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <article className="rounded-2xl border border-primary-100 bg-primary-50 p-6 sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary-700">Our vision</p>
+              <h3 className="mt-3 text-xl font-bold text-slate-950">A better environment for care</h3>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                To create a suitable environment for chronically ill patients and older adults in Ethiopia and across Africa.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-accent-100 bg-accent-50 p-6 sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-accent-700">Our mission</p>
+              <h3 className="mt-3 text-xl font-bold text-slate-950">Quality care with lasting impact</h3>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                To deliver quality healthcare services at home while fostering job opportunities for healthcare professionals through capacity building, innovation, and sustainable practices.
+              </p>
+            </article>
+          </div>
+        </div>
       </section>
 
-      <section id="how-it-works" className="scroll-mt-28 bg-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <section id="how-it-works" className="scroll-mt-28 bg-[#f7faf6] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div className="max-w-2xl">
@@ -132,19 +128,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-primary-900 px-4 py-14 text-white sm:px-6 sm:py-16 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-7 md:flex-row md:items-center">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-primary-200">Start with Rohobot</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Let&apos;s make healthcare connections count.</h2>
-            <p className="mt-3 text-sm leading-6 text-primary-100 sm:text-base">Choose the path that fits you and take the next step.</p>
-          </div>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link href="/login?role=candidate"><Button size="lg" className="w-full bg-white text-primary-900 hover:bg-primary-50 sm:w-auto">Candidate sign in</Button></Link>
-            <Link href="/employer/register"><Button size="lg" className="w-full sm:w-auto">For employers</Button></Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

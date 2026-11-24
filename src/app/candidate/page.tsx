@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card } from "@/components/ui/Card"; // We will build this next
 import { Button } from "@/components/ui/Button";
@@ -14,33 +13,12 @@ import {
 } from "lucide-react";
 
 export default function CandidateOverviewPage() {
-  const [candidateName, setCandidateName] = useState("candidate");
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Could not load candidate account.");
-        return (await response.json()) as { account: { name: string } };
-      })
-      .then(({ account }) => {
-        if (active) setCandidateName(account.name);
-      })
-      .catch((error: unknown) => {
-        if (active) console.error("Could not load candidate account.", error);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
   return (
     <DashboardLayout role="candidate">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Welcome, {candidateName}
+            Welcome
           </h1>
           <p className="text-slate-500 mt-1">
             Complete your candidate profile and review your recruitment activity.
@@ -48,7 +26,7 @@ export default function CandidateOverviewPage() {
         </div>
 
         <div role="note" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Local demo account: activity and dashboard figures below are sample data.
+          Dashboard metrics are sample data and are not live backend reports.
         </div>
 
         {/* Stats Grid */}
