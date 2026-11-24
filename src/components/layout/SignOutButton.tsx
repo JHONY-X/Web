@@ -15,7 +15,7 @@ export function SignOutButton() {
     setErrorMessage("");
 
     try {
-      const response = await fetch("/api/auth/logout", { method: "POST" });
+      const response = await fetch("/api/auth/user/logout", { method: "POST" });
       if (!response.ok) {
         throw new Error(`Sign-out request failed with status ${response.status}`);
       }

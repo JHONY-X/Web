@@ -5,13 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HeartPulse, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { userService } from "@/lib/api/services/user";
 
 export function VerifyEmailClient({
   role,
   email,
+  phone,
 }: {
   role: "candidate" | "employer";
   email: string;
+  phone: string;
 }) {
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -26,17 +29,11 @@ export function VerifyEmailClient({
     setNotice("");
     setErrorMessage("");
     try {
-      const response = await fetch("/api/demo/otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "request", role, email }),
-      });
-      const result = (await response.json()) as { message?: string; error?: string };
-      if (!response.ok) throw new Error(result.error ?? "Could not create an OTP.");
-      setNotice(result.message ?? "OTP requested.");
+      await userService.resendOtp();
+      setNotice("A new verification code was requested.");
     } catch (error) {
       console.error("Could not request verification OTP.", error);
-      setErrorMessage(error instanceof Error ? error.message : "Could not create an OTP.");
+      setErrorMessage(error instanceof Error ? error.message : "Could not request a verification code.");
     } finally {
       setIsRequesting(false);
     }
@@ -48,16 +45,11 @@ export function VerifyEmailClient({
     setErrorMessage("");
     setNotice("");
     try {
-      const response = await fetch("/api/demo/otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", role, email, code }),
-      });
-      const result = (await response.json()) as { success?: boolean; message?: string; error?: string };
-      if (!response.ok || !result.success) throw new Error(result.message ?? result.error ?? "OTP verification failed.");
+      if (!phone) throw new Error("The phone number is missing. Return to registration and try again.");
+      await userService.verifyEmail(phone, code);
       setIsVerified(true);
-      setNotice(result.message ?? "Email verified.");
-      router.replace(`/login?role=${role}&verified=1`);
+      setNotice("Your account is verified.");
+      router.replace(`/login?role=${role}&verified=1&email=${encodeURIComponent(email)}`);
     } catch (error) {
       console.error("Could not verify account email.", error);
       setErrorMessage(error instanceof Error ? error.message : "OTP verification failed.");
@@ -82,13 +74,11 @@ export function VerifyEmailClient({
           <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-700"><MailCheck className="h-6 w-6" /></div>
           <p className="text-sm font-semibold uppercase tracking-wide text-primary-700">{role} email verification</p>
           <h1 className="mt-2 text-2xl font-bold text-slate-900">Verify your email address</h1>
-          <p className="mt-3 text-sm text-slate-600">Email to verify: <strong>{email || "Not provided"}</strong></p>
-          <div role="note" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            This local demo does not send email. Request a code, then ask the admin to share the simulated OTP from Admin → Workflow reviews.
-          </div>
+          <p className="mt-3 text-sm text-slate-600">Email: <strong>{email || "Not provided"}</strong></p>
+          <p className="mt-1 text-sm text-slate-600">Phone: <strong>{phone || "Not provided"}</strong></p>
           {!isVerified ? (
             <>
-              <Button type="button" className="mt-5 w-full" isLoading={isRequesting} disabled={isRequesting || !email} onClick={requestOtp}>
+              <Button type="button" className="mt-5 w-full" isLoading={isRequesting}               disabled={isRequesting || !phone} onClick={requestOtp}>
                 Request verification code
               </Button>
               <form onSubmit={verifyOtp} className="mt-5 space-y-4">
@@ -108,7 +98,7 @@ export function VerifyEmailClient({
           )}
           {notice && <p role="status" className="mt-4 text-sm text-primary-800">{notice}</p>}
           {errorMessage && <p role="alert" className="mt-4 text-sm text-red-700">{errorMessage}</p>}
-          <p className="mt-6 text-xs text-slate-500">OTP expires after 10 minutes and is limited to five attempts.</p>
+          <p className="mt-6 text-xs text-slate-500">If you have not received a code, request another one.</p>
         </div>
       </section>
     </main>

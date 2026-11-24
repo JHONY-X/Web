@@ -3,12 +3,9 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { HeartPulse, ShieldCheck, ClipboardCheck, KeyRound } from "lucide-react";
+import { HeartPulse, ShieldCheck, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-
-const DEMO_ACCOUNTS = [
-  { role: "admin", label: "Admin", icon: ClipboardCheck, destination: "/admin" },
-] as const;
+import { userService } from "@/lib/api/services/user";
 
 export default function LoginPage() {
   return (
@@ -22,7 +19,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [isSigningIn, setIsSigningIn] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [roleOverride, setRoleOverride] = useState<"candidate" | "employer" | null>(null);
   const requestedRole = searchParams.get("role");
@@ -39,53 +36,11 @@ function LoginForm() {
     setErrorMessage("");
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role: selectedRole }),
-      });
-      const result = (await response.json()) as { error?: string; role?: string; destination?: string };
-      if (!response.ok) throw new Error(result.error ?? "Sign-in failed. Please try again.");
-      if (result.role !== selectedRole || !result.destination) {
-        throw new Error("The account role does not match the selected sign-in form.");
-      }
-      window.location.assign(result.destination);
+      await userService.login({ email_address: email, password }, selectedRole);
+      window.location.assign(selectedRole === "employer" ? "/employer" : "/candidate");
     } catch (error) {
       console.error("Account sign-in failed.", error);
       setErrorMessage(error instanceof Error ? error.message : "Sign-in failed. Please try again.");
-      setIsSigningIn(null);
-    }
-  };
-
-  const handleDemoSignIn = async (role: (typeof DEMO_ACCOUNTS)[number]["role"]) => {
-    setIsSigningIn(role);
-    setErrorMessage("");
-
-    try {
-      const response = await fetch("/api/auth/demo-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
-
-      if (!response.ok) {
-        const result = (await response.json()) as { error?: string };
-        throw new Error(result.error ?? "Demo sign-in failed. Please try again.");
-      }
-
-      const account = DEMO_ACCOUNTS.find((demoAccount) => demoAccount.role === role);
-      if (!account) throw new Error("Choose a valid demo role.");
-
-      const requestedPath = new URLSearchParams(window.location.search).get("redirect");
-      const destination =
-        requestedPath === account.destination ||
-        requestedPath?.startsWith(`${account.destination}/`)
-          ? requestedPath
-          : account.destination;
-      window.location.assign(destination);
-    } catch (error) {
-      console.error("Demo sign-in failed.", error);
-      setErrorMessage(error instanceof Error ? error.message : "Demo sign-in failed. Please try again.");
       setIsSigningIn(null);
     }
   };
@@ -116,7 +71,7 @@ function LoginForm() {
                 Where compassionate care meets opportunity.
               </h1>
               <p className="mt-4 leading-relaxed text-primary-100">
-                Access healthcare career, professional development, and employer connection demos.
+                Access healthcare careers, professional development, and employer connections.
               </p>
             </div>
             <p className="text-sm text-primary-100/80">Rohobot Home-Based Health Care Service PLC</p>
@@ -126,11 +81,10 @@ function LoginForm() {
             <p className="text-sm font-semibold uppercase tracking-wider text-accent-700">Welcome</p>
             <h2 className="mt-2 text-2xl font-bold text-slate-900">Sign in to Rohobot</h2>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Candidates must register from an official invitation. Employers register directly.
+              Candidates must register with a valid backend invitation. Organization registration is being connected separately.
             </p>
 
-            {process.env.NODE_ENV !== "production" ? (
-              <>
+            <>
               <div className="mt-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1" role="group" aria-label="Account type">
                 {(["candidate", "employer"] as const).map((role) => (
                   <button
@@ -175,6 +129,9 @@ function LoginForm() {
                   Sign in as {selectedRole}
                 </Button>
               </form>
+              <Link href="/forgot-password" className="mt-3 inline-flex text-sm font-semibold text-primary-700 hover:underline">
+                Forgot your password?
+              </Link>
               {selectedRole === "employer" && (
                 <p className="mt-4 text-sm text-slate-600">
                   New employer? <Link href="/employer/register" className="font-semibold text-primary-700 hover:underline">Register your organization</Link>
@@ -183,40 +140,10 @@ function LoginForm() {
               {selectedRole === "candidate" && (
                 <p className="mt-4 text-sm text-slate-600">Need an account? Ask a Rohobot official for your candidate invitation link.</p>
               )}
-              </>
-            ) : (
-              <div role="status" className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                Production sign-in is not connected yet. Account workflows are available only in the local development demo.
-              </div>
-            )}
-
-            {process.env.NODE_ENV !== "production" && (
-              <>
-                <div role="status" className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                  Local demo only. Candidate and employer accounts are stored in server memory and reset when the server restarts.
-                </div>
-                <h3 className="mt-7 text-sm font-semibold text-slate-800">Official testing shortcuts</h3>
-                <div className="mt-3 space-y-3">
-                  {DEMO_ACCOUNTS.map(({ role, label, icon: Icon }) => (
-                    <Button
-                      key={role}
-                      type="button"
-                      variant={role === "admin" ? "outline" : "primary"}
-                      className="w-full justify-center gap-2"
-                      disabled={isSigningIn !== null}
-                      isLoading={isSigningIn === role}
-                      onClick={() => handleDemoSignIn(role)}
-                    >
-                      {!isSigningIn && <Icon className="h-4 w-4" />}
-                      Continue as demo {label}
-                    </Button>
-                  ))}
-                </div>
-                {errorMessage && (
-                  <p role="alert" className="mt-4 text-sm text-red-700">{errorMessage}</p>
-                )}
-              </>
-            )}
+              {errorMessage && (
+                <p role="alert" className="mt-4 text-sm text-red-700">{errorMessage}</p>
+              )}
+            </>
 
             <Link href="/" className="mt-6 inline-flex text-sm font-semibold text-primary-700 hover:text-primary-900">
               Return to Rohobot home
